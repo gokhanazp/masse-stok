@@ -109,49 +109,163 @@
 
     <script>
         // Feature Graphic çiz (1024x500)
+        // Helper function for rounded rectangles
+        function roundRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        }
+
         function drawFeatureGraphic() {
             const canvas = document.getElementById('featureGraphic');
             const ctx = canvas.getContext('2d');
-            
-            // Gradient arka plan
+
+            // Modern gradient background (Masse blue tones)
             const gradient = ctx.createLinearGradient(0, 0, 1024, 500);
-            gradient.addColorStop(0, '#1976D2');
-            gradient.addColorStop(1, '#1565C0');
+            gradient.addColorStop(0, '#0D5C9E');  // Masse blue
+            gradient.addColorStop(0.5, '#1976D2');
+            gradient.addColorStop(1, '#0D5C9E');
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, 1024, 500);
-            
-            // Beyaz overlay pattern
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
-            for (let i = 0; i < 20; i++) {
-                ctx.fillRect(i * 60, 0, 30, 500);
+
+            // Add subtle pattern overlay
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.03)';
+            for (let i = 0; i < 1024; i += 40) {
+                ctx.fillRect(i, 0, 20, 500);
             }
-            
-            // Logo alanı (sol)
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
-            ctx.fillRect(50, 150, 200, 200);
-            
-            // Logo metni
-            ctx.fillStyle = 'white';
-            ctx.font = 'bold 48px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('MASSE', 150, 260);
-            
-            // Ana başlık
-            ctx.font = 'bold 72px Arial';
-            ctx.textAlign = 'left';
-            ctx.fillText('Stok Arama', 300, 220);
-            
-            // Alt başlık
-            ctx.font = '36px Arial';
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-            ctx.fillText('Hızlı ve Kolay Stok Sorgulama', 300, 280);
-            
-            // Özellikler
-            ctx.font = '24px Arial';
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-            ctx.fillText('✓ 8 Mağaza Stok Takibi', 300, 330);
-            ctx.fillText('✓ Anlık Güncelleme', 300, 365);
-            ctx.fillText('✓ Ürün Detayları', 300, 400);
+
+            // Load and draw Masse Yapi logo
+            const logo = new Image();
+            logo.crossOrigin = 'anonymous';
+            logo.onload = function() {
+                // Draw logo centered at top
+                const logoWidth = 400;
+                const logoHeight = (logo.height / logo.width) * logoWidth;
+                const logoX = (1024 - logoWidth) / 2;
+                const logoY = 40;
+                ctx.drawImage(logo, logoX, logoY, logoWidth, logoHeight);
+
+                // App subtitle
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 42px Arial, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+                ctx.shadowBlur = 10;
+                ctx.shadowOffsetX = 2;
+                ctx.shadowOffsetY = 2;
+                ctx.fillText('Stok Arama Uygulaması', 512, logoY + logoHeight + 60);
+
+                // Reset shadow
+                ctx.shadowColor = 'transparent';
+                ctx.shadowBlur = 0;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 0;
+
+                // Feature boxes
+                const features = [
+                    { icon: '🏪', text: '8 Mağaza' },
+                    { icon: '📦', text: 'Anlık Stok' },
+                    { icon: '⚡', text: 'Hızlı Arama' }
+                ];
+
+                const boxWidth = 280;
+                const boxHeight = 80;
+                const boxY = 320;
+                const spacing = 30;
+                const totalWidth = (boxWidth * 3) + (spacing * 2);
+                const startX = (1024 - totalWidth) / 2;
+
+                features.forEach((feature, index) => {
+                    const x = startX + (index * (boxWidth + spacing));
+
+                    // Box background
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+                    ctx.lineWidth = 2;
+                    roundRect(ctx, x, boxY, boxWidth, boxHeight, 15);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // Icon
+                    ctx.font = '36px Arial';
+                    ctx.fillStyle = 'white';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(feature.icon, x + boxWidth / 2, boxY + 35);
+
+                    // Text
+                    ctx.font = 'bold 24px Arial, sans-serif';
+                    ctx.fillText(feature.text, x + boxWidth / 2, boxY + 65);
+                });
+
+                // Bottom tagline
+                ctx.font = '26px Arial, sans-serif';
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                ctx.textAlign = 'center';
+                ctx.fillText('Tüm mağaza stoklarını anında sorgulayın', 512, 460);
+            };
+            logo.onerror = function() {
+                // Fallback if logo doesn't load - draw text version
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 72px Arial, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+                ctx.shadowBlur = 10;
+                ctx.fillText('MASSE YAPI', 512, 120);
+
+                ctx.font = 'bold 42px Arial, sans-serif';
+                ctx.fillText('Stok Arama Uygulaması', 512, 180);
+
+                // Continue with features...
+                ctx.shadowColor = 'transparent';
+                ctx.shadowBlur = 0;
+
+                const features = [
+                    { icon: '🏪', text: '8 Mağaza' },
+                    { icon: '📦', text: 'Anlık Stok' },
+                    { icon: '⚡', text: 'Hızlı Arama' }
+                ];
+
+                const boxWidth = 280;
+                const boxHeight = 80;
+                const boxY = 280;
+                const spacing = 30;
+                const totalWidth = (boxWidth * 3) + (spacing * 2);
+                const startX = (1024 - totalWidth) / 2;
+
+                features.forEach((feature, index) => {
+                    const x = startX + (index * (boxWidth + spacing));
+
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+                    ctx.lineWidth = 2;
+                    roundRect(ctx, x, boxY, boxWidth, boxHeight, 15);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.font = '36px Arial';
+                    ctx.fillStyle = 'white';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(feature.icon, x + boxWidth / 2, boxY + 35);
+
+                    ctx.font = 'bold 24px Arial, sans-serif';
+                    ctx.fillText(feature.text, x + boxWidth / 2, boxY + 65);
+                });
+
+                ctx.font = '26px Arial, sans-serif';
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                ctx.textAlign = 'center';
+                ctx.fillText('Tüm mağaza stoklarını anında sorgulayın', 512, 420);
+            };
+            // Try to load the logo from the uploaded image
+            logo.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBmaWxsPSIjMEQ1QzlFIiBkPSJNMTAgMjE5aDQ4djc0SDEwem0xMDQgMGg0OHY3NEgxMTR6bTEwNCAwaDQ4djc0aC00OHptMTA0IDBoNDh2NzRoLTQ4em0xMDQgMGg0OHY3NGgtNDh6Ii8+PC9zdmc+';
         }
 
         // Screenshot 1 çiz - Arama Ekranı (540x960, 2x scale = 1080x1920)
