@@ -1,0 +1,72 @@
+Masse Stok Arama - Tüm Masse mağazalarında anlık stok takibi!
+
+🔍 HIZLI STOK SORGULAMA
+
+Ürün kodunu girerek 8 farklı Masse mağazasındaki stok durumunu anında öğrenin. Artık stok kontrolü için mağazaları tek tek aramaya gerek yok!
+
+📦 DESTEKLENEN MAĞAZALAR
+
+• Masse
+• Grohe
+• Yutas
+• Yilmazlar
+• Eroglu
+• Evdema
+• Algi
+• Ark
+
+✨ ÖZELLİKLER
+
+ANLIK STOK BİLGİSİ
+Her mağazadaki güncel stok adedini görüntüleyin. Stokta olmayan mağazalar otomatik olarak gri renkte gösterilir.
+
+DETAYLI ÜRÜN BİLGİLERİ
+• Ürün adı ve açıklaması
+• Güncel fiyat bilgisi
+• Para birimi (EUR/TL)
+• Ürün görseli
+• Toplam stok adedi
+
+AKILLI ARAMA
+Tam ürün kodunu bilmiyorsanız sorun değil! Kısmi kod ile arama yapabilirsiniz. Örneğin "20474000" yazarak "GRH20474000" kodlu ürünü bulabilirsiniz.
+
+OTOMATİK GÜNCELLEME
+Veriler her gün saat 10:00'da otomatik olarak güncellenir. İsterseniz manuel olarak da yenileyebilirsiniz.
+
+KULLANICI DOSTU ARAYÜZ
+Modern ve sade tasarım ile kolay kullanım. Tüm bilgiler tek ekranda, net ve anlaşılır şekilde gösterilir.
+
+HIZLI VE GÜVENİLİR
+Google Sheets entegrasyonu ile güncel ve doğru stok bilgisi. İnternet bağlantısı olduğu sürece her yerden erişim.
+
+🎯 KİMLER İÇİN?
+
+• Masse mağaza çalışanları
+• Satış temsilcileri
+• Stok yöneticileri
+• Müşteri hizmetleri personeli
+• Ürün danışmanları
+
+💡 NASIL KULLANILIR?
+
+1. Uygulamayı açın
+2. Ürün kodunu girin (tam veya kısmi)
+3. "Ara" butonuna tıklayın
+4. Tüm mağazalardaki stok durumunu görün!
+
+🔐 GİZLİLİK
+
+• Hiçbir kişisel veri toplanmaz
+• Reklam gösterilmez
+• Kullanıcı takibi yapılmaz
+• %100 gizlilik odaklı
+
+🔄 GÜNCELLEMELER
+
+Uygulama sürekli geliştirilmektedir. Yeni özellikler ve iyileştirmeler düzenli olarak eklenmektedir.
+
+📞 DESTEK
+
+Sorularınız veya önerileriniz için bizimle iletişime geçebilirsiniz.
+
+Hızlı stok kontrolü için hemen indirin! 🚀

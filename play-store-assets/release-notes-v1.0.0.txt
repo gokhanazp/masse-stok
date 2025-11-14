@@ -1,0 +1,14 @@
+🎉 İlk sürüm!
+
+✨ Özellikler:
+• 8 mağazada anlık stok sorgulama
+• Detaylı ürün bilgileri ve fiyat
+• Otomatik günlük güncelleme (10:00)
+• Kısmi kod ile akıllı arama
+• Modern ve kullanıcı dostu arayüz
+• Hiçbir kişisel veri toplanmaz
+
+📦 Desteklenen Mağazalar:
+Masse, Grohe, Yutas, Yilmazlar, Eroglu, Evdema, Algi, Ark
+
+Hızlı stok kontrolü için hemen indirin! 🚀

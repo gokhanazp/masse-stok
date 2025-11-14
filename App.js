@@ -36,11 +36,39 @@ function AppContent() {
   const [productInfo, setProductInfo] = useState(null); // Ürün bilgisi
   const [loading, setLoading] = useState(true); // Yükleme durumu
   const [searching, setSearching] = useState(false); // Arama durumu
+  const [refreshing, setRefreshing] = useState(false); // Manuel yenileme durumu
+  const [lastUpdateTime, setLastUpdateTime] = useState(null); // Son güncelleme zamanı
 
   // Uygulama başladığında verileri yükle
   useEffect(() => {
     loadData();
   }, []);
+
+  // Her gün sabah 10'da otomatik güncelleme
+  useEffect(() => {
+    const checkAndUpdate = () => {
+      const now = new Date();
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+
+      // Sabah 10:00 - 10:05 arasında güncelle (5 dakikalık pencere)
+      if (hours === 10 && minutes < 5) {
+        const lastUpdate = lastUpdateTime ? new Date(lastUpdateTime) : null;
+        const today = new Date().toDateString();
+
+        // Bugün henüz güncelleme yapılmadıysa
+        if (!lastUpdate || lastUpdate.toDateString() !== today) {
+          console.log('🕙 Sabah 10:00 otomatik güncelleme başlatılıyor...');
+          loadData();
+        }
+      }
+    };
+
+    // Her dakika kontrol et
+    const interval = setInterval(checkAndUpdate, 60000); // 60 saniye
+
+    return () => clearInterval(interval);
+  }, [lastUpdateTime]);
 
   /**
    * Stok ve ürün verilerini yükler
@@ -57,6 +85,11 @@ function AppContent() {
       const products = await fetchProductData();
       setProductData(products);
 
+      // Son güncelleme zamanını kaydet
+      const now = new Date();
+      setLastUpdateTime(now);
+      console.log('✅ Veriler güncellendi:', now.toLocaleString('tr-TR'));
+
     } catch (error) {
       Alert.alert(
         'Hata',
@@ -66,6 +99,22 @@ function AppContent() {
       console.error('❌ Veri yükleme hatası:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  /**
+   * Manuel yenileme fonksiyonu
+   */
+  const handleRefresh = async () => {
+    try {
+      setRefreshing(true);
+      console.log('🔄 Manuel yenileme başlatıldı...');
+      await loadData();
+      Alert.alert('Başarılı', 'Veriler güncellendi!');
+    } catch (error) {
+      console.error('❌ Yenileme hatası:', error);
+    } finally {
+      setRefreshing(false);
     }
   };
 
@@ -142,7 +191,35 @@ function AppContent() {
 
       {/* Arama Bölümü */}
       <View style={styles.searchSection}>
-        <Text style={styles.title}>Stok Arama</Text>
+        <View style={styles.titleRow}>
+          <Text style={styles.title}>Stok Arama</Text>
+
+          {/* Yenileme Butonu */}
+          <TouchableOpacity
+            style={styles.refreshButton}
+            onPress={handleRefresh}
+            disabled={refreshing}
+          >
+            {refreshing ? (
+              <ActivityIndicator size="small" color="#0066CC" />
+            ) : (
+              <Text style={styles.refreshButtonText}>🔄 Yenile</Text>
+            )}
+          </TouchableOpacity>
+        </View>
+
+        {/* Son Güncelleme Zamanı */}
+        {lastUpdateTime && (
+          <Text style={styles.lastUpdateText}>
+            Son güncelleme: {new Date(lastUpdateTime).toLocaleString('tr-TR', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            })}
+          </Text>
+        )}
 
         <TextInput
           style={styles.input}
@@ -178,47 +255,49 @@ function AppContent() {
       {/* Sonuç Başlığı */}
       {searchResult && (
         <View style={styles.resultHeader}>
-          {/* Ürün Bilgisi - 2 Kolonlu Tasarım */}
+          {/* Ürün Bilgisi - Yeni Tasarım */}
           <View style={styles.productCard}>
-            {/* Sol Kolon - Fotoğraf */}
-            {productInfo && productInfo['ImageURL1'] && (
-              <Image
-                source={{ uri: productInfo['ImageURL1'] }}
-                style={styles.productImage}
-                resizeMode="contain"
-              />
-            )}
-
-            {/* Sağ Kolon - Bilgiler */}
-            <View style={styles.productInfo}>
-              {/* Üst Satır - Ürün Adı ve Fiyat */}
-              {productInfo && (
-                <>
-                  <Text style={styles.productName} numberOfLines={2}>
-                    {productInfo['UrunAdi'] || 'Ürün Adı Yok'}
-                  </Text>
-                  <Text style={styles.productPrice}>
-                    {productInfo['price3'] || '0'} {productInfo['ParaBirimi'] || 'TL'}
-                  </Text>
-                </>
+            {/* Üst Kısım - Fotoğraf ve Bilgiler Yan Yana */}
+            <View style={styles.productTopRow}>
+              {/* Sol - Fotoğraf */}
+              {productInfo && productInfo['ImageURL1'] && (
+                <Image
+                  source={{ uri: productInfo['ImageURL1'] }}
+                  style={styles.productImage}
+                  resizeMode="contain"
+                />
               )}
 
-              {/* Alt Satır - Ürün Kodu ve Toplam Stok */}
-              <View style={styles.productMetaContainer}>
-                <View style={styles.productMetaItem}>
-                  <Text style={styles.productMetaLabel}>Ürün Kodu</Text>
-                  <Text style={styles.productMetaValue}>{searchResult.productCode}</Text>
-                </View>
-                <View style={styles.productMetaItem}>
-                  <Text style={styles.productMetaLabel}>Toplam Stok</Text>
-                  <Text style={[
-                    styles.productMetaValue,
-                    styles.totalStockHighlight,
-                    searchResult.totalStock === 0 && styles.totalStockZero
-                  ]}>
-                    {searchResult.totalStock}
-                  </Text>
-                </View>
+              {/* Sağ - Ürün Adı ve Fiyat */}
+              <View style={styles.productInfo}>
+                {productInfo && (
+                  <>
+                    <Text style={styles.productName} numberOfLines={2}>
+                      {productInfo['UrunAdi'] || 'Ürün Adı Yok'}
+                    </Text>
+                    <Text style={styles.productPrice}>
+                      {productInfo['price3'] || '0'} {productInfo['ParaBirimi'] || 'TL'}
+                    </Text>
+                  </>
+                )}
+              </View>
+            </View>
+
+            {/* Alt Kısım - Ürün Kodu ve Toplam Stok (Fotoğrafın Altından Başlıyor) */}
+            <View style={styles.productMetaContainer}>
+              <View style={styles.productMetaItem}>
+                <Text style={styles.productMetaLabel}>Ürün Kodu</Text>
+                <Text style={styles.productMetaValue}>{searchResult.productCode}</Text>
+              </View>
+              <View style={styles.productMetaItem}>
+                <Text style={styles.productMetaLabel}>Toplam Stok</Text>
+                <Text style={[
+                  styles.productMetaValue,
+                  styles.totalStockHighlight,
+                  searchResult.totalStock === 0 && styles.totalStockZero
+                ]}>
+                  {searchResult.totalStock}
+                </Text>
               </View>
             </View>
           </View>
@@ -234,7 +313,15 @@ function AppContent() {
       {searchResult ? (
         // Sonuç varsa FlatList kullan
         <FlatList
-          ListHeaderComponent={renderHeader}
+          ListHeaderComponent={
+            <>
+              {renderHeader()}
+              {/* Mağaza Stokları Başlık */}
+              <View style={styles.storeListHeader}>
+                <Text style={styles.storeListTitle}>Mağaza Stokları</Text>
+              </View>
+            </>
+          }
           data={searchResult.storeStocks}
           keyExtractor={(item) => item.storeName}
           renderItem={({ item }) => (
@@ -254,6 +341,7 @@ function AppContent() {
             </View>
           )}
           contentContainerStyle={styles.listContent}
+          ListFooterComponent={<View style={styles.listFooter} />}
         />
       ) : (
         // Sonuç yoksa sadece header göster
@@ -298,13 +386,15 @@ const styles = StyleSheet.create({
     height: 80,
   },
   listContent: {
-    padding: 16,
+    paddingHorizontal: 8, // Sol ve sağ boşlukları azalttık
+    paddingBottom: 16,
   },
   searchSection: {
     backgroundColor: '#FFF',
     borderRadius: 12,
     padding: 20,
-    margin: 16,
+    marginHorizontal: 8, // Sol ve sağ boşlukları azalttık (16'dan 8'e)
+    marginTop: 8,
     marginBottom: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -312,11 +402,35 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
+  titleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#0066CC',
+  },
+  refreshButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: '#F0F7FF',
+    borderWidth: 1,
+    borderColor: '#0066CC',
+  },
+  refreshButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#0066CC',
+  },
+  lastUpdateText: {
+    fontSize: 12,
+    color: '#757575',
     marginBottom: 16,
+    textAlign: 'center',
   },
   input: {
     borderWidth: 1,
@@ -349,84 +463,112 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   resultHeader: {
-    margin: 16,
+    marginHorizontal: 8, // Sol ve sağ boşlukları azalttık (16'dan 8'e)
     marginTop: 0,
+    marginBottom: 8,
   },
   productCard: {
     backgroundColor: '#FFF',
     borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
+    padding: 20,
+    marginBottom: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
-    flexDirection: 'row', // Yatay düzen - 2 kolon
+    flexDirection: 'column', // Dikey düzen - üstte fotoğraf+bilgi, altta kod+stok
+  },
+  productTopRow: {
+    flexDirection: 'row', // Fotoğraf ve bilgiler yan yana
     alignItems: 'flex-start',
+    marginBottom: 16, // Alt kısımla arasında boşluk
   },
   productImage: {
-    width: 160, // Daha da büyük fotoğraf
-    height: 160,
-    marginRight: 16, // Sağ tarafta boşluk
+    width: 120,
+    height: 120,
+    marginRight: 16,
     borderRadius: 8,
     backgroundColor: '#F5F5F5',
   },
   productInfo: {
     flex: 1, // Kalan alanı kapla
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
   },
   productName: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
     color: '#333',
-    marginBottom: 6,
-    lineHeight: 22,
+    marginBottom: 8,
+    lineHeight: 20,
   },
   productPrice: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#0066CC',
-    marginBottom: 12,
   },
   productMetaContainer: {
-    flexDirection: 'row',
+    flexDirection: 'row', // Yan yana
     justifyContent: 'space-between',
-    marginTop: 8,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#E0E0E0',
+    gap: 8, // İki kutu arasında boşluk
   },
   productMetaItem: {
-    flex: 1,
+    flex: 1, // Eşit genişlik
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    backgroundColor: '#F8F9FA', // Hafif arka plan
+    borderRadius: 8,
+    alignItems: 'center', // Ortala
   },
   productMetaLabel: {
-    fontSize: 13,
+    fontSize: 11,
     color: '#757575',
-    marginBottom: 4,
+    marginBottom: 6,
     fontWeight: '500',
+    textTransform: 'uppercase', // Büyük harf
+    letterSpacing: 0.5,
   },
   productMetaValue: {
-    fontSize: 18, // Daha büyük - özellikle toplam stok için önemli
+    fontSize: 15, // Daha okunabilir
     fontWeight: 'bold',
     color: '#333',
   },
   totalStockHighlight: {
-    fontSize: 22, // Toplam stok daha da büyük
+    fontSize: 24, // Toplam stok çok büyük ve belirgin
     color: '#28A745', // Yeşil - stok var
   },
   totalStockZero: {
     color: '#BDBDBD', // Gri - stok yok
   },
 
+  storeListHeader: {
+    marginHorizontal: 8, // Sol ve sağ boşlukları azalttık
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  storeListTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    paddingHorizontal: 12,
+  },
   storeRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 12,
+    paddingVertical: 14,
     paddingHorizontal: 20,
+    marginHorizontal: 8, // Sol ve sağ boşlukları azalttık
+    marginBottom: 8,
     backgroundColor: '#FFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
+    borderRadius: 12, // Yuvarlak köşeler
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  listFooter: {
+    height: 16, // Alt boşluk
   },
   storeName: {
     fontSize: 16,

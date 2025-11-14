@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Play Store Görselleri - Masse Stok Arama</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1976D2;
+            text-align: center;
+        }
+        .canvas-container {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+        canvas {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            display: block;
+            margin: 10px auto;
+            background: white;
+        }
+        button {
+            background: #1976D2;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #1565C0;
+        }
+        .info {
+            background: #E3F2FD;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+        .button-group {
+            text-align: center;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Google Play Store Görselleri</h1>
+        
+        <div class="info">
+            <h3>📋 Gerekli Görseller:</h3>
+            <ul>
+                <li><strong>Feature Graphic:</strong> 1024x500 px (Zorunlu)</li>
+                <li><strong>App Icon:</strong> 512x512 px (Zorunlu - Zaten var: massefav.png)</li>
+                <li><strong>Screenshots:</strong> 1080x1920 px (En az 2, en fazla 8)</li>
+            </ul>
+        </div>
+
+        <!-- Feature Graphic -->
+        <div class="canvas-container">
+            <h2>1️⃣ Feature Graphic (1024x500)</h2>
+            <canvas id="featureGraphic" width="1024" height="500"></canvas>
+            <div class="button-group">
+                <button onclick="downloadCanvas('featureGraphic', 'masse-feature-graphic.png')">
+                    📥 İndir (1024x500)
+                </button>
+            </div>
+        </div>
+
+        <!-- Screenshot 1 -->
+        <div class="canvas-container">
+            <h2>2️⃣ Ekran Görüntüsü 1 - Arama Ekranı (1080x1920)</h2>
+            <canvas id="screenshot1" width="540" height="960"></canvas>
+            <div class="button-group">
+                <button onclick="downloadCanvas('screenshot1', 'masse-screenshot-1.png', 2)">
+                    📥 İndir (1080x1920)
+                </button>
+            </div>
+        </div>
+
+        <!-- Screenshot 2 -->
+        <div class="canvas-container">
+            <h2>3️⃣ Ekran Görüntüsü 2 - Sonuç Ekranı (1080x1920)</h2>
+            <canvas id="screenshot2" width="540" height="960"></canvas>
+            <div class="button-group">
+                <button onclick="downloadCanvas('screenshot2', 'masse-screenshot-2.png', 2)">
+                    📥 İndir (1080x1920)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Feature Graphic çiz (1024x500)
+        function drawFeatureGraphic() {
+            const canvas = document.getElementById('featureGraphic');
+            const ctx = canvas.getContext('2d');
+            
+            // Gradient arka plan
+            const gradient = ctx.createLinearGradient(0, 0, 1024, 500);
+            gradient.addColorStop(0, '#1976D2');
+            gradient.addColorStop(1, '#1565C0');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 1024, 500);
+            
+            // Beyaz overlay pattern
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+            for (let i = 0; i < 20; i++) {
+                ctx.fillRect(i * 60, 0, 30, 500);
+            }
+            
+            // Logo alanı (sol)
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+            ctx.fillRect(50, 150, 200, 200);
+            
+            // Logo metni
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 48px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('MASSE', 150, 260);
+            
+            // Ana başlık
+            ctx.font = 'bold 72px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('Stok Arama', 300, 220);
+            
+            // Alt başlık
+            ctx.font = '36px Arial';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.fillText('Hızlı ve Kolay Stok Sorgulama', 300, 280);
+            
+            // Özellikler
+            ctx.font = '24px Arial';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.fillText('✓ 8 Mağaza Stok Takibi', 300, 330);
+            ctx.fillText('✓ Anlık Güncelleme', 300, 365);
+            ctx.fillText('✓ Ürün Detayları', 300, 400);
+        }
+
+        // Screenshot 1 çiz - Arama Ekranı (540x960, 2x scale = 1080x1920)
+        function drawScreenshot1() {
+            const canvas = document.getElementById('screenshot1');
+            const ctx = canvas.getContext('2d');
+
+            // Arka plan
+            ctx.fillStyle = '#F5F5F5';
+            ctx.fillRect(0, 0, 540, 960);
+
+            // Status bar
+            ctx.fillStyle = '#1976D2';
+            ctx.fillRect(0, 0, 540, 40);
+            ctx.fillStyle = 'white';
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('9:41', 270, 25);
+
+            // Header
+            ctx.fillStyle = '#1976D2';
+            ctx.fillRect(0, 40, 540, 60);
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 24px Arial';
+            ctx.fillText('Masse Stok Arama', 270, 80);
+
+            // Arama kartı
+            ctx.fillStyle = 'white';
+            ctx.shadowColor = 'rgba(0,0,0,0.1)';
+            ctx.shadowBlur = 10;
+            ctx.shadowOffsetY = 2;
+            ctx.fillRect(20, 120, 500, 200);
+            ctx.shadowBlur = 0;
+
+            // Arama başlığı
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 20px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('Stok Arama', 40, 155);
+
+            // Yenile butonu
+            ctx.fillStyle = '#1976D2';
+            ctx.font = '16px Arial';
+            ctx.textAlign = 'right';
+            ctx.fillText('🔄 Yenile', 500, 155);
+
+            // Input kutusu
+            ctx.strokeStyle = '#DDD';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(40, 180, 460, 50);
+            ctx.fillStyle = '#999';
+            ctx.font = '16px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('Ürün kodu girin...', 55, 210);
+
+            // Butonlar
+            ctx.fillStyle = '#1976D2';
+            ctx.fillRect(40, 250, 220, 50);
+            ctx.fillStyle = '#757575';
+            ctx.fillRect(280, 250, 220, 50);
+
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 18px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Ara', 150, 280);
+            ctx.fillText('Temizle', 390, 280);
+
+            // Bilgi kartı
+            ctx.fillStyle = 'white';
+            ctx.shadowColor = 'rgba(0,0,0,0.1)';
+            ctx.shadowBlur = 10;
+            ctx.shadowOffsetY = 2;
+            ctx.fillRect(20, 350, 500, 250);
+            ctx.shadowBlur = 0;
+
+            // İkon
+            ctx.fillStyle = '#E3F2FD';
+            ctx.fillRect(40, 380, 100, 100);
+            ctx.fillStyle = '#1976D2';
+            ctx.font = 'bold 48px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('📦', 90, 445);
+
+            // Bilgi metni
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 18px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('Hızlı Stok Sorgulama', 160, 400);
+
+            ctx.fillStyle = '#666';
+            ctx.font = '14px Arial';
+            ctx.fillText('• 8 mağazada anlık stok takibi', 160, 430);
+            ctx.fillText('• Ürün detayları ve fiyat bilgisi', 160, 455);
+            ctx.fillText('• Otomatik günlük güncelleme', 160, 480);
+            ctx.fillText('• Kısmi kod ile arama', 160, 505);
+
+            // Alt bilgi
+            ctx.fillStyle = '#999';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Ürün kodunu girerek başlayın', 270, 570);
+        }
+
+        // Screenshot 2 çiz - Sonuç Ekranı (540x960, 2x scale = 1080x1920)
+        function drawScreenshot2() {
+            const canvas = document.getElementById('screenshot2');
+            const ctx = canvas.getContext('2d');
+
+            // Arka plan
+            ctx.fillStyle = '#F5F5F5';
+            ctx.fillRect(0, 0, 540, 960);
+
+            // Status bar
+            ctx.fillStyle = '#1976D2';
+            ctx.fillRect(0, 0, 540, 40);
+            ctx.fillStyle = 'white';
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('9:41', 270, 25);
+
+            // Header
+            ctx.fillStyle = '#1976D2';
+            ctx.fillRect(0, 40, 540, 60);
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 24px Arial';
+            ctx.fillText('Masse Stok Arama', 270, 80);
+
+            // Arama kartı (küçük)
+            ctx.fillStyle = 'white';
+            ctx.shadowColor = 'rgba(0,0,0,0.1)';
+            ctx.shadowBlur = 10;
+            ctx.shadowOffsetY = 2;
+            ctx.fillRect(20, 120, 500, 80);
+            ctx.shadowBlur = 0;
+
+            ctx.fillStyle = '#333';
+            ctx.font = '16px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('Aranan: GRH20193GN2', 40, 165);
+
+            // Ürün kartı
+            ctx.fillStyle = 'white';
+            ctx.shadowColor = 'rgba(0,0,0,0.1)';
+            ctx.shadowBlur = 10;
+            ctx.shadowOffsetY = 2;
+            ctx.fillRect(20, 220, 500, 180);
+            ctx.shadowBlur = 0;
+
+            // Ürün resmi
+            ctx.fillStyle = '#E3F2FD';
+            ctx.fillRect(40, 240, 100, 100);
+            ctx.fillStyle = '#1976D2';
+            ctx.font = 'bold 36px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('🚿', 90, 300);
+
+            // Ürün bilgileri
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('Grohe Duş Başlığı', 160, 255);
+
+            ctx.fillStyle = '#1976D2';
+            ctx.font = 'bold 18px Arial';
+            ctx.fillText('1.255,38 EUR', 160, 285);
+
+            // Ürün kodu ve stok
+            ctx.fillStyle = '#F8F9FA';
+            ctx.fillRect(40, 360, 220, 30);
+            ctx.fillRect(280, 360, 220, 30);
+
+            ctx.fillStyle = '#666';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('ÜRÜN KODU', 150, 375);
+            ctx.fillText('TOPLAM STOK', 390, 375);
+
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('GRH20193GN2', 150, 385);
+
+            ctx.fillStyle = '#4CAF50';
+            ctx.font = 'bold 18px Arial';
+            ctx.fillText('7', 390, 387);
+
+            // Mağaza stokları başlık
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 18px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('Mağaza Stokları', 40, 440);
+
+            // Mağaza kartları
+            const stores = [
+                { name: 'Masse', stock: 7, y: 460 },
+                { name: 'Grohe', stock: 0, y: 520 },
+                { name: 'Yutas', stock: 2, y: 580 },
+                { name: 'Yilmazlar', stock: 3, y: 640 }
+            ];
+
+            stores.forEach(store => {
+                ctx.fillStyle = 'white';
+                ctx.shadowColor = 'rgba(0,0,0,0.1)';
+                ctx.shadowBlur = 10;
+                ctx.shadowOffsetY = 2;
+                ctx.fillRect(20, store.y, 500, 50);
+                ctx.shadowBlur = 0;
+
+                ctx.fillStyle = store.stock === 0 ? '#BDBDBD' : '#333';
+                ctx.font = 'bold 16px Arial';
+                ctx.textAlign = 'left';
+                ctx.fillText(store.name, 40, store.y + 30);
+
+                ctx.fillStyle = store.stock === 0 ? '#BDBDBD' : '#4CAF50';
+                ctx.font = 'bold 20px Arial';
+                ctx.textAlign = 'right';
+                ctx.fillText(store.stock.toString(), 500, store.y + 32);
+            });
+        }
+
+        // Canvas'ı indir
+        function downloadCanvas(canvasId, filename, scale = 1) {
+            const canvas = document.getElementById(canvasId);
+
+            if (scale > 1) {
+                // Yüksek çözünürlük için yeni canvas oluştur
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = canvas.width * scale;
+                tempCanvas.height = canvas.height * scale;
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCtx.scale(scale, scale);
+                tempCtx.drawImage(canvas, 0, 0);
+
+                const link = document.createElement('a');
+                link.download = filename;
+                link.href = tempCanvas.toDataURL('image/png');
+                link.click();
+            } else {
+                const link = document.createElement('a');
+                link.download = filename;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            }
+        }
+
+        // Sayfa yüklendiğinde çiz
+        window.onload = function() {
+            drawFeatureGraphic();
+            drawScreenshot1();
+            drawScreenshot2();
+        };
+    </script>
+</body>
+</html>
+

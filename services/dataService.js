@@ -193,8 +193,9 @@ export async function fetchProductData() {
 
 /**
  * Ürün koduna göre stok bilgisi arar
+ * Hem tam kod (GRH20474000) hem de kısmi kod (20474000) ile arama yapabilir
  * @param {Array} stockData - Stok verileri
- * @param {string} productCode - Ürün kodu
+ * @param {string} productCode - Ürün kodu (tam veya kısmi)
  * @returns {Object|null} - Bulunan stok bilgisi veya null
  */
 export function searchStockByCode(stockData, productCode) {
@@ -207,14 +208,27 @@ export function searchStockByCode(stockData, productCode) {
   console.log(`🔍 Aranan kod: "${searchCode}"`);
   console.log(`📊 Toplam ${stockData.length} ürün içinde aranıyor...`);
 
-  const result = stockData.find(item =>
+  // Önce tam eşleşme ara
+  let result = stockData.find(item =>
     item['Ürün Kodu'] && item['Ürün Kodu'].toUpperCase() === searchCode
   );
 
-  if (result) {
-    console.log('✅ Ürün bulundu:', result['Ürün Kodu']);
+  // Tam eşleşme bulunamazsa, kısmi eşleşme ara (ürün kodu içinde geçiyorsa)
+  if (!result) {
+    console.log('⚠️ Tam eşleşme bulunamadı, kısmi arama yapılıyor...');
+    result = stockData.find(item =>
+      item['Ürün Kodu'] && item['Ürün Kodu'].toUpperCase().includes(searchCode)
+    );
+
+    if (result) {
+      console.log(`✅ Kısmi eşleşme bulundu: "${searchCode}" → "${result['Ürün Kodu']}"`);
+    }
   } else {
-    console.log('❌ Ürün bulunamadı');
+    console.log('✅ Tam eşleşme bulundu:', result['Ürün Kodu']);
+  }
+
+  if (!result) {
+    console.log('❌ Hiçbir eşleşme bulunamadı');
     // İlk 5 ürün kodunu göster
     console.log('📋 İlk 5 ürün kodu:', stockData.slice(0, 5).map(item => item['Ürün Kodu']));
   }
@@ -224,21 +238,35 @@ export function searchStockByCode(stockData, productCode) {
 
 /**
  * Ürün koduna göre ürün bilgisi arar
+ * Hem tam kod (GRH20474000) hem de kısmi kod (20474000) ile arama yapabilir
  * @param {Array} productData - Ürün verileri
- * @param {string} productCode - Ürün kodu
+ * @param {string} productCode - Ürün kodu (tam veya kısmi)
  * @returns {Object|null} - Bulunan ürün bilgisi veya null
  */
 export function searchProductByCode(productData, productCode) {
   if (!productCode || !productData || productData.length === 0) return null;
 
   const searchCode = productCode.trim().toUpperCase();
-  const result = productData.find(item =>
+
+  // Önce tam eşleşme ara
+  let result = productData.find(item =>
     item['Urun-Kodu'] && item['Urun-Kodu'].toUpperCase() === searchCode
   );
 
-  if (result) {
-    console.log('🛍️ Ürün bilgisi bulundu:', result['UrunAdi']);
+  // Tam eşleşme bulunamazsa, kısmi eşleşme ara
+  if (!result) {
+    result = productData.find(item =>
+      item['Urun-Kodu'] && item['Urun-Kodu'].toUpperCase().includes(searchCode)
+    );
+
+    if (result) {
+      console.log(`🛍️ Ürün bilgisi (kısmi eşleşme) bulundu: "${searchCode}" → "${result['Urun-Kodu']}" - ${result['UrunAdi']}`);
+    }
   } else {
+    console.log('🛍️ Ürün bilgisi (tam eşleşme) bulundu:', result['UrunAdi']);
+  }
+
+  if (!result) {
     console.log('⚠️ Ürün bilgisi bulunamadı');
   }
 
