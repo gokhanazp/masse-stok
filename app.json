@@ -2,7 +2,7 @@
   "expo": {
     "name": "Masse Stok Arama",
     "slug": "masse-stok-arama",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/massefav.png",
     "userInterfaceStyle": "light",

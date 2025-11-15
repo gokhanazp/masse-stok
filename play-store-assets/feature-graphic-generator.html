@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Masse Feature Graphic Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 1100px;
+        }
+        
+        h1 {
+            color: #0D5C9E;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        canvas {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            display: block;
+            margin: 20px auto;
+            max-width: 100%;
+            height: auto;
+        }
+        
+        .button-group {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        button {
+            background: #0D5C9E;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #1976D2;
+        }
+        
+        .info {
+            background: #E3F2FD;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid #0D5C9E;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Masse Feature Graphic (1024x500)</h1>
+        
+        <canvas id="featureGraphic" width="1024" height="500"></canvas>
+        
+        <div class="button-group">
+            <button onclick="downloadCanvas()">📥 İndir (1024x500 PNG)</button>
+        </div>
+        
+        <div class="info">
+            <strong>📋 Bilgi:</strong> Bu görsel Google Play Store için Feature Graphic olarak kullanılabilir.
+            <br><strong>Boyut:</strong> 1024x500 px
+            <br><strong>Format:</strong> PNG
+        </div>
+    </div>
+
+    <script>
+        function drawFeatureGraphic() {
+            const canvas = document.getElementById('featureGraphic');
+            const ctx = canvas.getContext('2d');
+            
+            // Beyaz arka plan
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, 1024, 500);
+            
+            // Masse Yapi logosunu yükle ve çiz
+            const logo = new Image();
+            logo.onload = function() {
+                // Logo boyutları (orijinal oranı koru)
+                const logoWidth = 500;
+                const logoHeight = (logo.height / logo.width) * logoWidth;
+                const logoX = (1024 - logoWidth) / 2;
+                const logoY = 80;
+                
+                // Logoyu çiz
+                ctx.drawImage(logo, logoX, logoY, logoWidth, logoHeight);
+                
+                // Alt kısımda "Stok Arama Uygulaması" yazısı
+                ctx.fillStyle = '#0D5C9E';
+                ctx.font = 'bold 48px Arial, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('Stok Arama Uygulaması', 512, 380);
+                
+                // Özellikler - küçük ikonlar ve yazılar
+                ctx.font = '24px Arial, sans-serif';
+                ctx.fillStyle = '#666666';
+                
+                const features = ['8 Mağaza', 'Anlık Stok', 'Hızlı Arama'];
+                const totalWidth = features.length * 150;
+                const startX = (1024 - totalWidth) / 2;
+                
+                features.forEach((feature, index) => {
+                    const x = startX + (index * 200) + 100;
+                    ctx.fillText('• ' + feature, x, 440);
+                });
+            };
+            
+            // Logo yolu - attığınız görseli kullan
+            logo.src = '../assets/masse-yapi-logo.svg';
+        }
+        
+        function downloadCanvas() {
+            const canvas = document.getElementById('featureGraphic');
+            const link = document.createElement('a');
+            link.download = 'masse-feature-graphic-1024x500.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+        
+        // Sayfa yüklendiğinde çiz
+        window.onload = drawFeatureGraphic;
+    </script>
+</body>
+</html>
+
