@@ -228,9 +228,11 @@ export function searchStockByCode(stockData, productCode) {
   }
 
   if (!result) {
-    console.log('❌ Hiçbir eşleşme bulunamadı');
+    console.log('❌ AnaÖzet sheet\'inde bu ürün kodu bulunamadı');
+    console.log(`📋 Aranan: "${searchCode}"`);
+    console.log(`📊 Toplam ${stockData.length} ürün arasında arandı`);
     // İlk 5 ürün kodunu göster
-    console.log('📋 İlk 5 ürün kodu:', stockData.slice(0, 5).map(item => item['Ürün Kodu']));
+    console.log('📋 İlk 5 ürün kodu örneği:', stockData.slice(0, 5).map(item => item['Ürün Kodu']));
   }
 
   return result;

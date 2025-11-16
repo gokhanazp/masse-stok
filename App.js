@@ -22,6 +22,7 @@ import {
   searchProductByCode,
   formatStockInfo,
 } from './services/dataService';
+import CartScreen from './components/CartScreen';
 
 /**
  * Ana uygulama bileşeni
@@ -38,6 +39,10 @@ function AppContent() {
   const [searching, setSearching] = useState(false); // Arama durumu
   const [refreshing, setRefreshing] = useState(false); // Manuel yenileme durumu
   const [lastUpdateTime, setLastUpdateTime] = useState(null); // Son güncelleme zamanı
+  const [cart, setCart] = useState([]); // Sepet
+  const [showCart, setShowCart] = useState(false); // Sepet ekranı göster/gizle
+  const [errorMessage, setErrorMessage] = useState(null); // Hata mesajı
+  const [addQuantity, setAddQuantity] = useState(1); // Eklenecek ürün adedi
 
   // Uygulama başladığında verileri yükle
   useEffect(() => {
@@ -123,26 +128,32 @@ function AppContent() {
    */
   const handleSearch = () => {
     if (!searchCode.trim()) {
-      Alert.alert('Uyarı', 'Lütfen bir ürün kodu girin.');
+      setErrorMessage('Lütfen bir ürün kodu girin.');
       return;
     }
 
     setSearching(true);
+    setErrorMessage(null); // Önceki hata mesajını temizle
 
-    // Stok bilgisini ara
+    // Stok bilgisini ara (AnaÖzet sheet'inden)
     const stock = searchStockByCode(stockData, searchCode);
 
     // Ürün bilgisini ara
     const product = searchProductByCode(productData, searchCode);
 
     if (stock) {
+      // Stok bilgisi bulundu
       const formattedStock = formatStockInfo(stock);
       setSearchResult(formattedStock);
       setProductInfo(product);
+      setErrorMessage(null);
+      console.log('✅ Ürün bulundu:', searchCode);
     } else {
+      // Stok bilgisi bulunamadı - AnaÖzet'te yok
       setSearchResult(null);
       setProductInfo(null);
-      Alert.alert('Sonuç Bulunamadı', 'Bu ürün kodu için bilgi bulunamadı.');
+      setErrorMessage(`"${searchCode}" ürün kodu AnaÖzet listesinde bulunamadı. Lütfen ürün kodunu kontrol edin.`);
+      console.log('❌ Ürün bulunamadı:', searchCode);
     }
 
     setSearching(false);
@@ -155,6 +166,83 @@ function AppContent() {
     setSearchCode('');
     setSearchResult(null);
     setProductInfo(null);
+    setErrorMessage(null);
+  };
+
+  /**
+   * Sepete ürün ekler veya adedini artırır
+   */
+  const handleAddToCart = () => {
+    if (!productInfo || !searchResult) {
+      setErrorMessage('Sepete eklenecek ürün bulunamadı.');
+      return;
+    }
+
+    const quantityToAdd = Math.max(1, addQuantity); // En az 1 adet
+
+    // Ürün zaten sepette mi kontrol et
+    const existingItemIndex = cart.findIndex(item => item.productCode === searchResult.productCode);
+
+    if (existingItemIndex !== -1) {
+      // Ürün zaten sepette - adedini artır
+      const updatedCart = [...cart];
+      updatedCart[existingItemIndex].quantity += quantityToAdd;
+      setCart(updatedCart);
+      console.log(`✅ Ürün adedi artırıldı: ${searchResult.productCode} (+${quantityToAdd} = ${updatedCart[existingItemIndex].quantity})`);
+    } else {
+      // Yeni ürün - sepete ekle
+      const cartItem = {
+        productCode: searchResult.productCode,
+        productName: productInfo['UrunAdi'] || 'Ürün Adı Yok',
+        price: productInfo['price3'] || '0',
+        currency: productInfo['ParaBirimi'] || 'TL',
+        imageUrl: productInfo['ImageURL1'] || null,
+        quantity: quantityToAdd,
+      };
+
+      setCart([...cart, cartItem]);
+      console.log(`✅ Yeni ürün sepete eklendi: ${searchResult.productCode} (${quantityToAdd} adet)`);
+    }
+
+    // Adet inputunu sıfırla
+    setAddQuantity(1);
+  };
+
+  /**
+   * Sepetten ürün çıkarır
+   */
+  const handleRemoveFromCart = (productCode) => {
+    setCart(cart.filter(item => item.productCode !== productCode));
+  };
+
+  /**
+   * Sepetteki ürün adedini günceller
+   */
+  const handleUpdateQuantity = (productCode, change) => {
+    const updatedCart = cart.map(item => {
+      if (item.productCode === productCode) {
+        return {
+          ...item,
+          quantity: Math.max(1, (item.quantity || 1) + change)
+        };
+      }
+      return item;
+    });
+    setCart(updatedCart);
+  };
+
+  /**
+   * Sepet ekranını gösterir
+   */
+  const handleShowCart = () => {
+    setShowCart(true);
+  };
+
+  /**
+   * Sepet ekranından geri döner
+   */
+  const handleGoBack = () => {
+    setShowCart(false);
   };
 
   // Yükleme ekranı
@@ -172,21 +260,33 @@ function AppContent() {
   // Render fonksiyonu - Header ve arama bölümü
   const renderHeader = () => (
     <>
-      {/* Header - Logo */}
+      {/* Header - Logo ve Sepet */}
       <View style={styles.header}>
-        {Platform.OS === 'web' ? (
-          <img
-            src="https://masseyapi.com/Data/EditorFiles/Masse_Logo_Blue_a.svg"
-            alt="Masse Logo"
-            style={{ width: 180, height: 50 }}
-          />
-        ) : (
-          <SvgUri
-            width="180"
-            height="50"
-            uri="https://masseyapi.com/Data/EditorFiles/Masse_Logo_Blue_a.svg"
-          />
-        )}
+        <View style={styles.headerContent}>
+          {Platform.OS === 'web' ? (
+            <img
+              src="https://masseyapi.com/Data/EditorFiles/Masse_Logo_Blue_a.svg"
+              alt="Masse Logo"
+              style={{ width: 180, height: 50 }}
+            />
+          ) : (
+            <SvgUri
+              width="180"
+              height="50"
+              uri="https://masseyapi.com/Data/EditorFiles/Masse_Logo_Blue_a.svg"
+            />
+          )}
+
+          {/* Sepet Butonu */}
+          <TouchableOpacity style={styles.cartButton} onPress={handleShowCart}>
+            <Text style={styles.cartIcon}>🛒</Text>
+            {cart.length > 0 && (
+              <View style={styles.cartBadge}>
+                <Text style={styles.cartBadgeText}>{cart.length}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Arama Bölümü */}
@@ -225,10 +325,21 @@ function AppContent() {
           style={styles.input}
           placeholder="Ürün Kodu Girin"
           value={searchCode}
-          onChangeText={setSearchCode}
+          onChangeText={(text) => {
+            setSearchCode(text);
+            setErrorMessage(null); // Kullanıcı yazmaya başladığında hatayı temizle
+          }}
           autoCapitalize="characters"
           onSubmitEditing={handleSearch}
         />
+
+        {/* Hata Mesajı */}
+        {errorMessage && (
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorIcon}>⚠️</Text>
+            <Text style={styles.errorText}>{errorMessage}</Text>
+          </View>
+        )}
 
         <View style={styles.buttonRow}>
           <TouchableOpacity
@@ -300,11 +411,62 @@ function AppContent() {
                 </Text>
               </View>
             </View>
+
+            {/* Adet ve Sepete Ekle - Tek Satır */}
+            <View style={styles.addToCartContainer}>
+              {/* Adet Kontrolleri */}
+              <View style={styles.quantityControls}>
+                <TouchableOpacity
+                  style={styles.quantityControlButton}
+                  onPress={() => setAddQuantity(Math.max(1, addQuantity - 1))}
+                >
+                  <Text style={styles.quantityControlButtonText}>−</Text>
+                </TouchableOpacity>
+
+                <TextInput
+                  style={styles.quantityInput}
+                  value={String(addQuantity)}
+                  onChangeText={(text) => {
+                    const num = parseInt(text) || 1;
+                    setAddQuantity(Math.max(1, num));
+                  }}
+                  keyboardType="numeric"
+                  maxLength={3}
+                />
+
+                <TouchableOpacity
+                  style={styles.quantityControlButton}
+                  onPress={() => setAddQuantity(addQuantity + 1)}
+                >
+                  <Text style={styles.quantityControlButtonText}>+</Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Sepete Ekle Butonu */}
+              <TouchableOpacity
+                style={styles.addToCartButton}
+                onPress={handleAddToCart}
+              >
+                <Text style={styles.addToCartButtonText}>🛒 Sepete Ekle</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       )}
     </>
   );
+
+  // Sepet ekranı gösteriliyorsa
+  if (showCart) {
+    return (
+      <CartScreen
+        cart={cart}
+        onRemoveFromCart={handleRemoveFromCart}
+        onUpdateQuantity={handleUpdateQuantity}
+        onGoBack={handleGoBack}
+      />
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -379,11 +541,39 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: '#FFF',
     padding: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
     borderBottomWidth: 1,
     borderBottomColor: '#E0E0E0',
-    height: 80,
+  },
+  headerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  cartButton: {
+    position: 'relative',
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#F0F7FF',
+  },
+  cartIcon: {
+    fontSize: 28,
+  },
+  cartBadge: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    backgroundColor: '#DC3545',
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+  },
+  cartBadgeText: {
+    color: '#FFF',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
   listContent: {
     paddingHorizontal: 8, // Sol ve sağ boşlukları azalttık
@@ -438,8 +628,28 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    marginBottom: 16,
+    marginBottom: 12,
     backgroundColor: '#F9F9F9',
+  },
+  errorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF3CD',
+    borderLeftWidth: 4,
+    borderLeftColor: '#FFC107',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+  },
+  errorIcon: {
+    fontSize: 20,
+    marginRight: 8,
+  },
+  errorText: {
+    flex: 1,
+    fontSize: 14,
+    color: '#856404',
+    lineHeight: 20,
   },
   buttonRow: {
     flexDirection: 'row',
@@ -539,6 +749,60 @@ const styles = StyleSheet.create({
   },
   totalStockZero: {
     color: '#BDBDBD', // Gri - stok yok
+  },
+  addToCartContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 16,
+    gap: 12,
+  },
+  quantityControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8F9FA',
+    borderRadius: 8,
+    padding: 4,
+  },
+  quantityControlButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#0066CC',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  quantityControlButtonText: {
+    color: '#FFF',
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  quantityInput: {
+    width: 50,
+    height: 36,
+    textAlign: 'center',
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    marginHorizontal: 8,
+  },
+  addToCartButton: {
+    flex: 1,
+    backgroundColor: '#28A745',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  addToCartButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 
   storeListHeader: {
