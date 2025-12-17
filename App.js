@@ -30,6 +30,9 @@ import CartScreen from './components/CartScreen';
  */
 function AppContent() {
   // State tanımlamaları
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // Giriş durumu
+  const [password, setPassword] = useState(''); // Şifre input
+  const [loginError, setLoginError] = useState(''); // Giriş hatası
   const [stockData, setStockData] = useState([]); // Stok verileri
   const [productData, setProductData] = useState([]); // Ürün verileri
   const [searchCode, setSearchCode] = useState(''); // Arama input
@@ -43,6 +46,21 @@ function AppContent() {
   const [showCart, setShowCart] = useState(false); // Sepet ekranı göster/gizle
   const [errorMessage, setErrorMessage] = useState(null); // Hata mesajı
   const [addQuantity, setAddQuantity] = useState(1); // Eklenecek ürün adedi
+
+  /**
+   * Giriş kontrolü
+   */
+  const handleLogin = () => {
+    const correctPassword = 'Masse-2026!';
+    if (password === correctPassword) {
+      setIsAuthenticated(true);
+      setLoginError('');
+      setPassword('');
+    } else {
+      setLoginError('Hatalı şifre! Lütfen tekrar deneyin.');
+      setPassword('');
+    }
+  };
 
   // Uygulama başladığında verileri yükle
   useEffect(() => {
@@ -252,6 +270,70 @@ function AppContent() {
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#0066CC" />
           <Text style={styles.loadingText}>Veriler yükleniyor...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Giriş ekranı - Kullanıcı giriş yapmadıysa
+  if (!isAuthenticated) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loginContainer}>
+          {/* Logo */}
+          <View style={styles.loginLogoContainer}>
+            {Platform.OS === 'web' ? (
+              <img
+                src="https://masseyapi.com/Data/EditorFiles/Masse_Logo_Blue_a.svg"
+                alt="Masse Logo"
+                style={{ width: 220, height: 60, marginBottom: 40 }}
+              />
+            ) : (
+              <SvgUri
+                width="220"
+                height="60"
+                uri="https://masseyapi.com/Data/EditorFiles/Masse_Logo_Blue_a.svg"
+              />
+            )}
+          </View>
+
+          {/* Giriş Formu */}
+          <View style={styles.loginForm}>
+            <Text style={styles.loginTitle}>Stok Arama Sistemi</Text>
+            <Text style={styles.loginSubtitle}>Devam etmek için şifrenizi girin</Text>
+
+            {/* Şifre Input */}
+            <TextInput
+              style={styles.loginInput}
+              placeholder="Şifre"
+              value={password}
+              onChangeText={(text) => {
+                setPassword(text);
+                setLoginError('');
+              }}
+              secureTextEntry
+              autoCapitalize="none"
+              onSubmitEditing={handleLogin}
+            />
+
+            {/* Hata Mesajı */}
+            {loginError && (
+              <View style={styles.loginErrorContainer}>
+                <Text style={styles.loginErrorText}>⚠️ {loginError}</Text>
+              </View>
+            )}
+
+            {/* Giriş Butonu */}
+            <TouchableOpacity
+              style={styles.loginButton}
+              onPress={handleLogin}
+            >
+              <Text style={styles.loginButtonText}>Giriş Yap</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Footer */}
+          <Text style={styles.loginFooter}>© 2025 Masse Yapı</Text>
         </View>
       </SafeAreaView>
     );
@@ -851,5 +933,86 @@ const styles = StyleSheet.create({
   },
   outOfStock: {
     color: '#BDBDBD', // Açık gri - Stok yok (pasif renk)
+  },
+  // Giriş Ekranı Stilleri
+  loginContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F5F5F5',
+    padding: 24,
+  },
+  loginLogoContainer: {
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+  loginForm: {
+    width: '100%',
+    maxWidth: 400,
+    backgroundColor: '#FFF',
+    borderRadius: 16,
+    padding: 32,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  loginTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#0066CC',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  loginSubtitle: {
+    fontSize: 14,
+    color: '#757575',
+    textAlign: 'center',
+    marginBottom: 32,
+  },
+  loginInput: {
+    borderWidth: 1,
+    borderColor: '#DDD',
+    borderRadius: 8,
+    padding: 16,
+    fontSize: 16,
+    marginBottom: 16,
+    backgroundColor: '#F9F9F9',
+  },
+  loginErrorContainer: {
+    backgroundColor: '#FFF3CD',
+    borderLeftWidth: 4,
+    borderLeftColor: '#FFC107',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+  },
+  loginErrorText: {
+    fontSize: 14,
+    color: '#856404',
+    textAlign: 'center',
+  },
+  loginButton: {
+    backgroundColor: '#0066CC',
+    paddingVertical: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  loginButtonText: {
+    color: '#FFF',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  loginFooter: {
+    marginTop: 32,
+    fontSize: 12,
+    color: '#999',
+    textAlign: 'center',
   },
 });
