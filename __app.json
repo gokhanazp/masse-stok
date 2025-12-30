@@ -14,20 +14,14 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.massestok",
-      "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
-      },
-      "config": {
-        "usesNonExemptEncryption": false
-      }
+      "bundleIdentifier": "com.masse.stokarama"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/massefav.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.massestok",
+      "package": "com.masse.stokarama",
       "versionCode": 1,
       "permissions": [
         "INTERNET"

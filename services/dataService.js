@@ -55,7 +55,9 @@ function parseCSV(csvText) {
     const values = parseLine(lines[i]);
     const row = {};
     headers.forEach((header, index) => {
-      row[header] = values[index] || '';
+      // Sütun 0'ı her zaman 'Ürün Kodu' olarak kabul et (Sheet başlığı bozuk olsa bile)
+      const key = index === 0 ? 'Ürün Kodu' : header;
+      row[key] = values[index] || '';
     });
 
     // Sadece ürün kodu olan satırları ekle
@@ -233,6 +235,9 @@ export function searchStockByCode(stockData, productCode) {
     console.log(`📊 Toplam ${stockData.length} ürün arasında arandı`);
     // İlk 5 ürün kodunu göster
     console.log('📋 İlk 5 ürün kodu örneği:', stockData.slice(0, 5).map(item => item['Ürün Kodu']));
+    if (stockData.length > 0) {
+      console.log('📋 Mevcut sütun başlıkları (Keys):', Object.keys(stockData[0]));
+    }
   }
 
   return result;
